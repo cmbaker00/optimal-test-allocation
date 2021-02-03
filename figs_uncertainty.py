@@ -4,7 +4,6 @@ from SimpleModelsModule import TestOptimisation
 from plotting_code import make_onward_transmission_vector, make_population_tuple
 import param_values as scenario
 
-
 def sample_onward_transmission(onwards_dict):
     close_contact = np.random.uniform(*onwards_dict['close_contact'])
     symptomatic = np.random.uniform(*onwards_dict['symptomatic'])
@@ -208,16 +207,6 @@ if run_symp_presentation_range:
                            test_order=scenario.priority_order[0])
 
 
-    run_analysis_save_plot(priority=priority_queue,
-                           onward_transmission=onward_transmission_range,
-                           pop=pop_distribution_range,
-                           pre_prob=pre_prob_range,
-                           cap=cap_range,
-                           prop_symp=prop_symp_range,
-                           reps=100,
-                           scenario_name='presenting_prop_range_25_75_community_transmission_capacity_high_symp_priority',
-                           plot_title='Presenting proportion between 25% and 75%',
-                           test_order=scenario.priority_order[1])
 
 
     cap_range = [scenario.test_capacity_low]
@@ -233,17 +222,6 @@ if run_symp_presentation_range:
                            plot_title='Presenting proportion between 25% and 75%',
                            test_order=scenario.priority_order[0])
 
-
-    run_analysis_save_plot(priority=priority_queue,
-                           onward_transmission=onward_transmission_range,
-                           pop=pop_distribution_range,
-                           pre_prob=pre_prob_range,
-                           cap=cap_range,
-                           prop_symp=prop_symp_range,
-                           reps=100,
-                           scenario_name='presenting_prop_range_25_75_community_transmission_capacity_low_symp_priority',
-                           plot_title='Presenting proportion between 25% and 75%',
-                           test_order=scenario.priority_order[1])
 
     priority_queue = True
     onward_transmission_range = {'close_contact': [cc_on_outbreak],
@@ -271,16 +249,7 @@ if run_symp_presentation_range:
                            plot_title='Presenting proportion between 25% and 75%',
                            test_order=scenario.priority_order[0])
 
-    run_analysis_save_plot(priority=priority_queue,
-                           onward_transmission=onward_transmission_range,
-                           pop=pop_distribution_range,
-                           pre_prob=pre_prob_range,
-                           cap=cap_range,
-                           prop_symp=prop_symp_range,
-                           reps=100,
-                           scenario_name='presenting_prop_range_25_75_outbreak_response_capacity_high_symp_priority',
-                           plot_title='Presenting proportion between 25% and 75%',
-                           test_order=scenario.priority_order[1])
+
 
     cap_range = [scenario.test_capacity_low]
 
@@ -295,16 +264,6 @@ if run_symp_presentation_range:
                            plot_title='Presenting proportion between 25% and 75%',
                            test_order=scenario.priority_order[0])
 
-    run_analysis_save_plot(priority=priority_queue,
-                           onward_transmission=onward_transmission_range,
-                           pop=pop_distribution_range,
-                           pre_prob=pre_prob_range,
-                           cap=cap_range,
-                           prop_symp=prop_symp_range,
-                           reps=100,
-                           scenario_name='presenting_prop_range_25_75_outbreak_response_capacity_low_symp_priority',
-                           plot_title='Presenting proportion between 25% and 75%',
-                           test_order=scenario.priority_order[1])
 
 if run_onward_transmission_range:
     priority_queue = True
