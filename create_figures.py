@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from SimpleModelsModule import TestOptimisation
@@ -7,14 +6,14 @@ import plotting_code
 import itertools
 
 if __name__ == "__main__":
-    test_figure_area = False
-    tat_figure = False
-    kretzschmar_figure = False
-    onward_transmission_double_figure = False
-    track_trace_impact_figure = False
+    test_figure_area = True
+    tat_figure = True
+    kretzschmar_figure = True
+    onward_transmission_double_figure = True
+    track_trace_impact_figure = True
     positive_percent_impact_figure = True
-    supplement_pos_perc_figures = False
-    supplement_figure_non_quadratic = False
+    supplement_pos_perc_figures = True
+    supplement_figure_non_quadratic = True
 
     base_figure_directory = 'MS_figures'
 
@@ -29,10 +28,10 @@ if __name__ == "__main__":
 
         population_high, cases_high = \
             plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
-                                  num_symp=scenario.pop_high[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_high)
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
 
         print(f'Daily infections = {cases_high}')
 
@@ -44,10 +43,10 @@ if __name__ == "__main__":
 
         population_low, cases_low = \
             plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
-                                  num_symp=scenario.pop_low[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_low)
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
 
         print(f'Daily infections = {cases_low}')
 
@@ -74,8 +73,8 @@ if __name__ == "__main__":
                     for symp_prop_value in symp_prop_values:
 
                         axs_current = next(axs_count)
-                        for scenario in scenario_names:
-                            c_dict = situation_dict[scenario]
+                        for scenario_name in scenario_names:
+                            c_dict = situation_dict[scenario_name]
 
                             test_optim = TestOptimisation(priority_queue=priority_value,
                                                           onward_transmission=c_dict['onward'],
@@ -121,10 +120,10 @@ if __name__ == "__main__":
 
         population_high, cases_high = \
             plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
-                                  num_symp=scenario.pop_high[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_high)
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
 
         print(f'Daily infections = {cases_high}')
 
@@ -136,10 +135,10 @@ if __name__ == "__main__":
 
         population_low, cases_low = \
             plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
-                                  num_symp=scenario.pop_low[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_low)
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
 
         print(f'Daily infections = {cases_low}')
 
@@ -163,8 +162,8 @@ if __name__ == "__main__":
                 for capacity_value in capacity_values:
                     for symp_prop_value in symp_prop_values:
 
-                        for scenario in scenario_names:
-                            c_dict = situation_dict[scenario]
+                        for scenario_name in scenario_names:
+                            c_dict = situation_dict[scenario_name]
 
                             test_optim = TestOptimisation(priority_queue=priority_value,
                                                           onward_transmission=c_dict['onward'],
@@ -232,10 +231,10 @@ if __name__ == "__main__":
 
         population_high, cases_high = \
             plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
-                                  num_symp=scenario.pop_high[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_high)
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
 
         print(f'Daily infections = {cases_high}')
 
@@ -247,10 +246,10 @@ if __name__ == "__main__":
 
         population_low, cases_low = \
             plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
-                                  num_symp=scenario.pop_low[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_low)
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
 
         print(f'Daily infections = {cases_low}')
 
@@ -273,9 +272,9 @@ if __name__ == "__main__":
         priority_order = priority_allocation_options[0]
         capacity_value = capacity_values[0]
         symp_prop_value = symp_prop_values[0]
-        scenario = scenario_names[1]
+        scenario_name = scenario_names[1]
 
-        c_dict = situation_dict[scenario]
+        c_dict = situation_dict[scenario_name]
 
         test_optim = TestOptimisation(priority_queue=priority_value,
                                       onward_transmission=c_dict['onward'],
@@ -340,10 +339,10 @@ if __name__ == "__main__":
 
         population_high, cases_high = \
             plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
-                                  num_symp=scenario.pop_high[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_high)
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
 
         print(f'Daily infections = {cases_high}')
 
@@ -355,10 +354,10 @@ if __name__ == "__main__":
 
         population_low, cases_low = \
             plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
-                                  num_symp=scenario.pop_low[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_low)
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
 
         print(f'Daily infections = {cases_low}')
 
@@ -381,8 +380,8 @@ if __name__ == "__main__":
         priority_order = priority_allocation_options[0]
         for capacity_value in capacity_values:
             for symp_prop_value in symp_prop_values:
-                for scenario in scenario_names:
-                    c_dict = situation_dict[scenario]
+                for scenario_name in scenario_names:
+                    c_dict = situation_dict[scenario_name]
                     test_optim = TestOptimisation(priority_queue=priority_value,
                                                   onward_transmission=c_dict['onward'],
                                                   population=c_dict['pop'],
@@ -396,9 +395,9 @@ if __name__ == "__main__":
                     test_nparray = np.array(test_array)/100
                     fig, ax1 = plt.subplots()
                     scenario_plot_name = None
-                    if scenario == 'Low_prev':
+                    if scenario_name == 'Low_prev':
                         scenario_plot_name = 'Outbreak response'
-                    if scenario == 'High_prev':
+                    if scenario_name == 'High_prev':
                         scenario_plot_name = 'Community transmission'
                     plt.title(f'{scenario_plot_name} scenario\ntest capacity = {capacity_value/100} per 1000, symptomatic presenting proportion = {symp_prop_value}')
                     color = 'tab:blue'
@@ -421,7 +420,7 @@ if __name__ == "__main__":
                     # plt.legend(['Routine capacity 2 per 1000', 'Routine capacity 4 per 1000'])
                     # axs[axs_current].set
                     # axs[axs_current].plot([capacity_value/100]*2, [0, 45],'--r')
-                    plt.savefig(f'{base_figure_directory}/Supplement_figures/Cases_identified_transmission_{scenario}_capacity{capacity_value}_sympprop_{symp_prop_value}.png')
+                    plt.savefig(f'{base_figure_directory}/Supplement_figures/Cases_identified_transmission_{scenario_name}_capacity{capacity_value}_sympprop_{symp_prop_value}.png')
                     # plt.show()
 
 
@@ -436,10 +435,10 @@ if __name__ == "__main__":
 
         population_high, cases_high = \
             plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
-                                  num_symp=scenario.pop_high[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_high)
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
 
         print(f'Daily infections = {cases_high}')
 
@@ -451,10 +450,10 @@ if __name__ == "__main__":
 
         population_low, cases_low = \
             plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
-                                  num_symp=scenario.pop_low[1],
-                                  total_pop=total_population,
-                                  presenting_proporition=1,
-                                  probability_by_indication=test_prob_low)
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
 
         print(f'Daily infections = {cases_low}')
 
@@ -476,16 +475,16 @@ if __name__ == "__main__":
         priority_value = priority_values[0]
         priority_order = priority_allocation_options[0]
         for capacity_value in capacity_values:
-            for scenario in scenario_names:
+            for scenario_name in scenario_names:
                 fig, axs = plt.subplots(1, 3, figsize=(14,8))
                 scenario_plot_name = None
-                if scenario == 'Low_prev':
+                if scenario_name == 'Low_prev':
                     scenario_plot_name = 'Outbreak response'
-                if scenario == 'High_prev':
+                if scenario_name == 'High_prev':
                     scenario_plot_name = 'Community transmission'
                 counter = itertools.count()
                 for tat_function in tat_function_list:
-                    c_dict = situation_dict[scenario]
+                    c_dict = situation_dict[scenario_name]
                     test_optim = TestOptimisation(priority_queue=priority_value,
                                                   onward_transmission=c_dict['onward'],
                                                   population=c_dict['pop'],
@@ -522,7 +521,7 @@ if __name__ == "__main__":
                     # plt.legend(['Routine capacity 2 per 1000', 'Routine capacity 4 per 1000'])
                     # axs[axs_current].set
                     # axs[axs_current].plot([capacity_value/100]*2, [0, 45],'--r')
-                plt.savefig(f'{base_figure_directory}/Supplement_figures/tat_function/Cases_identified_transmission_{scenario}_capacity{capacity_value}_tatfun_{tat_function}.png')
+                plt.savefig(f'{base_figure_directory}/Supplement_figures/tat_function/Cases_identified_transmission_{scenario_name}_capacity{capacity_value}_tatfun_{tat_function}.png')
                     # plt.show()
 
 
