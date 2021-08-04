@@ -17,7 +17,10 @@ class TestOptimisation:
                  swab_delay=1,
                  symptomatic_testing_proportion=1.,
                  test_prioritsation_by_indication=None,
-                 tat_function='quadratic'
+                 tat_function='quadratic',
+                 stochastic_tat_dist='deterministic',
+                 gamma_scale_for_tat_dist=1,
+                 stochastic_tat_reps=100
                  ):
         self.population = population
         self.close_contact, self.symptomatic, self.asymptomatic = population
@@ -38,6 +41,10 @@ class TestOptimisation:
         self.priority_order_indication = test_prioritsation_by_indication
 
         self.tat_function = tat_function
+
+        self.stochastic_tat_dist = stochastic_tat_dist
+        self.gamma_scale_for_tat_dist = gamma_scale_for_tat_dist
+        self.stochastic_tat_reps = stochastic_tat_reps
 
         if not 0 <= priority_capacity_proportion < 1:
             raise ValueError(f'Priority capacity proportion must be between '
@@ -306,13 +313,33 @@ class TestOptimisation:
         return tested_transmission + untested_transmission + priority_tested_transmission
 
     @lru_cache()
-    def estimate_transmission_with_testing(self, num_test):
-        tat = self.turn_around_time(num_test)  # todo: remove priority queue from turn_around_time?
-        test_allocation = self.allocate_tests(num_tests=num_test,
-                                              result_delay=tat)
-        percent_positive = sum(np.array(self.pre_test_by_indication) * np.sum(test_allocation, 0)) / num_test
-        total_transmission = self.estimate_total_tranmission(test_allocation,
-                                                             result_delay=tat)
+    def estimate_transmission_with_testing(self, num_test, distribution='deterministic',
+                                           gamma_scale=1, reps=100):
+        if distribution == 'deterministic':
+            tat = self.turn_around_time(num_test)  # todo: remove priority queue from turn_around_time?
+            test_allocation = self.allocate_tests(num_tests=num_test,
+                                                  result_delay=tat)
+            percent_positive = sum(np.array(self.pre_test_by_indication) * np.sum(test_allocation, 0)) / num_test
+            total_transmission = self.estimate_total_tranmission(test_allocation,
+                                                                 result_delay=tat)
+        elif distribution == 'gamma':
+            average_tat = self.turn_around_time(num_test)
+            gamma_shape = average_tat/gamma_scale
+            tat_list = np.random.gamma(shape=gamma_shape,
+                            scale=gamma_scale, size=reps) #note variance = shape*scale^2
+            perc_pos_list = list()
+            tot_trans_list = list()
+            for tat in tat_list:
+                test_allocation = self.allocate_tests(num_tests=num_test,
+                                                      result_delay=tat)
+                perc_pos_list.append(sum(np.array(self.pre_test_by_indication) * np.sum(test_allocation, 0)) / num_test)
+                tot_trans_list.append(self.estimate_total_tranmission(test_allocation,
+                                                                 result_delay=tat))
+            total_transmission = np.mean(tot_trans_list)
+            percent_positive = np.mean(perc_pos_list)
+        else:
+            raise ValueError(f'Distribution {distribution} not recognised')
+
         return total_transmission, percent_positive
 
     @lru_cache()
@@ -322,7 +349,10 @@ class TestOptimisation:
         positivity = []
         for num_tests in num_test_array:
             current_onward_transmission, current_positive_percentage = \
-                self.estimate_transmission_with_testing(num_test=num_tests)
+                self.estimate_transmission_with_testing(num_test=num_tests,
+                                                        distribution=self.stochastic_tat_dist,
+                                                        gamma_scale=self.gamma_scale_for_tat_dist,
+                                                        reps=self.stochastic_tat_reps)
             transmission.append(current_onward_transmission)
             positivity.append(current_positive_percentage)
         transmission = np.array(transmission)  # /\
@@ -372,7 +402,10 @@ class TestOptimisation:
             opt_found_flag = False
             while opt_found_flag is False:
                 new_onward_transmission, new_percent_positive = \
-                    self.estimate_transmission_with_testing(num_test=c_tests)
+                    self.estimate_transmission_with_testing(num_test=c_tests,
+                                                        distribution=self.stochastic_tat_dist,
+                                                        gamma_scale=self.gamma_scale_for_tat_dist,
+                                                        reps=self.stochastic_tat_reps)
                 if new_onward_transmission > c_transmission:
                     opt_test = c_tests
                     opt_found_flag = True

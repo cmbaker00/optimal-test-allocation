@@ -4,16 +4,21 @@ from SimpleModelsModule import TestOptimisation
 import param_values as scenario
 import plotting_code
 import itertools
+import matplotlib.ticker as mtick
 
 if __name__ == "__main__":
-    test_figure_area = True
-    tat_figure = True
-    kretzschmar_figure = True
-    onward_transmission_double_figure = True
-    track_trace_impact_figure = True
-    positive_percent_impact_figure = True
-    supplement_pos_perc_figures = True
-    supplement_figure_non_quadratic = True
+    test_figure_area = False
+    tat_figure = False
+    kretzschmar_figure = False
+    onward_transmission_double_figure = False
+    track_trace_impact_figure = False
+    positive_percent_impact_figure = False
+    supplement_pos_perc_figures = False
+    supplement_figure_non_quadratic = False
+
+    supplement_figure_stochastic_tat = False
+    supplement_figure_TAT_dist_hist = False
+    supplement_figure_swab_delay = True
 
     base_figure_directory = 'MS_figures'
 
@@ -302,6 +307,7 @@ if __name__ == "__main__":
         ax2 = ax1.twinx()
         color = [.25, .4, 0]
         ax2.plot([i/100 for i in test_array], 100*positive_array*np.array(test_array)/cases_high, color=color)
+        ax2.yaxis.set_major_formatter(mtick.PercentFormatter())
         ax2.set_ylabel('Percentage of infections identified', color=color)
 
         fig.tight_layout()
@@ -323,6 +329,7 @@ if __name__ == "__main__":
         color = [.25, .4, 0]
         ax2.plot([i/100 for i in test_array], 100*positive_array, color=color)
         ax2.set_ylabel('Percentage positive', color=color)
+        ax2.yaxis.set_major_formatter(mtick.PercentFormatter())
 
         fig.tight_layout()
         plt.savefig(f'{base_figure_directory}/Perc_pos_transmission.png')
@@ -601,4 +608,215 @@ if __name__ == "__main__":
         plt.savefig('MS_figures/kretzschmar_results.png')
         plt.show()
         plt.close()
+
+
+    if supplement_figure_stochastic_tat:
+        total_population = scenario.total_population
+
+        # High prevelance
+        onward_transmission_vector_high = \
+            plotting_code.make_onward_transmission_vector(*scenario.onward_transmission_high)
+
+        test_prob_high = scenario.test_prob_high
+
+        population_high, cases_high = \
+            plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
+
+        print(f'Daily infections = {cases_high}')
+
+        # Low prevelance
+        onward_transmission_vector_low = \
+            plotting_code.make_onward_transmission_vector(*scenario.onward_transmission_low)
+
+        test_prob_low = scenario.test_prob_low
+
+        population_low, cases_low = \
+            plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
+
+        print(f'Daily infections = {cases_low}')
+
+        # priority_values = [True, False]
+        priority_values = [False]
+        capacity_values = [scenario.test_capacity_high]
+        # symp_prop_values = [.5, 1]
+        symp_prop_values = [.5]
+        scenario_names = ['High_prev']
+        situation_dict = {
+                          'High_prev': {'onward': onward_transmission_vector_high,
+                                       'pop': population_high,
+                                       'pre_prob': test_prob_high}
+                          }
+        stochastic_param_list = [['deterministic', 1, 1, 'Deterministic'],
+                                 ['gamma', 100, 1, 'Gamma scale = 1'],
+                                 ['gamma', 100, 2, 'Gamma scale = 5']]
+        priority_allocation_options = scenario.priority_order
+
+        fig, axs = plt.subplots(1, len(stochastic_param_list), figsize=(8,4))
+        axs_count = itertools.count()
+        for priority_value in priority_values:
+            for priority_order in priority_allocation_options:
+                for capacity_value in capacity_values:
+                    for symp_prop_value in symp_prop_values:
+
+                        for scenario_name in scenario_names:
+                            c_dict = situation_dict[scenario_name]
+                            for stoch_param in stochastic_param_list:
+                                axs_current = next(axs_count)
+
+                                test_optim = TestOptimisation(priority_queue=priority_value,
+                                                              onward_transmission=c_dict['onward'],
+                                                              population=c_dict['pop'],
+                                                              pre_test_probability=c_dict['pre_prob'],
+                                                              routine_capacity=capacity_value,
+                                                              symptomatic_testing_proportion=symp_prop_value,
+                                                              test_prioritsation_by_indication=priority_order,
+                                                              stochastic_tat_dist=stoch_param[0],
+                                                              stochastic_tat_reps=stoch_param[1],
+                                                              gamma_scale_for_tat_dist=stoch_param[2])
+                                test_array, transmission_array, positive_array = \
+                                    test_optim.generate_onward_transmission_with_tests(max_tests_proportion=1000/capacity_value)
+
+
+                                axs[axs_current].plot([i/100 for i in test_array], 100*transmission_array/max(transmission_array))
+
+                                axs[axs_current].set(xlabel='Number of tests per 1000')
+                                if axs_current == 0:
+                                    axs[axs_current].set(ylabel='Percentage of onward transmission')
+                                # axs[axs_current].legend(['Outbreak response', 'Community transmission'])
+                                # axs[axs_current].set
+                                axs[axs_current].plot([capacity_value/100]*2, [75, 100],'--r')
+                                axs[axs_current].title.set_text(stoch_param[3])
+        plt.savefig(f'{base_figure_directory}/Stochastic_TAT.png')
+        plt.show()
+
+    if supplement_figure_TAT_dist_hist:
+
+        reps = 1000
+        binwidth = 1
+
+        fig, axs = plt.subplots(1, 3, figsize=(8, 4))
+        axs_count = itertools.count()
+
+        for tat in (1,2,4):
+            axs_current = next(axs_count)
+            gamma_scale = 1
+            gamma_shape = tat/gamma_scale
+            data = np.random.gamma(shape=gamma_shape,
+                            scale=gamma_scale, size=reps)
+            axs[axs_current].hist(data, bins=np.arange(min(data), max(data) + binwidth, binwidth), alpha=.75)
+
+            gamma_scale = 5
+            gamma_shape = tat/gamma_scale
+            data = np.random.gamma(shape=gamma_shape,
+                            scale=gamma_scale, size=reps)
+            axs[axs_current].hist(data, bins=np.arange(min(data), max(data) + binwidth, binwidth), alpha=.75)
+
+            # gamma_scale = 0.2
+            # gamma_shape = tat/gamma_scale
+            # data = np.random.gamma(shape=gamma_shape,
+            #                 scale=gamma_scale, size=reps)
+            # axs[axs_current].hist(data, bins=np.arange(min(data), max(data) + binwidth, binwidth), alpha=.75)
+
+            axs[axs_current].legend(['Gamma scale = 1','Gamma scale = 5'])
+            axs[axs_current].title.set_text(f'TAT = {tat}')
+            if axs_current == 0:
+                axs[axs_current].set(ylabel='Frequency')
+            axs[axs_current].set(xlabel='Days')
+        plt.savefig(f'{base_figure_directory}/TAT_hist.png')
+        plt.show()
+
+
+    if supplement_figure_swab_delay:
+        total_population = scenario.total_population
+
+        # High prevelance
+        onward_transmission_vector_high = \
+            plotting_code.make_onward_transmission_vector(*scenario.onward_transmission_high)
+
+        test_prob_high = scenario.test_prob_high
+
+        population_high, cases_high = \
+            plotting_code.make_population_tuple(num_close=scenario.pop_high[0],
+                                                num_symp=scenario.pop_high[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_high)
+
+        print(f'Daily infections = {cases_high}')
+
+        # Low prevelance
+        onward_transmission_vector_low = \
+            plotting_code.make_onward_transmission_vector(*scenario.onward_transmission_low)
+
+        test_prob_low = scenario.test_prob_low
+
+        population_low, cases_low = \
+            plotting_code.make_population_tuple(num_close=scenario.pop_low[0],
+                                                num_symp=scenario.pop_low[1],
+                                                total_pop=total_population,
+                                                presenting_proporition=1,
+                                                probability_by_indication=test_prob_low)
+
+        print(f'Daily infections = {cases_low}')
+
+        # priority_values = [True, False]
+        priority_values = [False]
+        capacity_values = [scenario.test_capacity_high]
+        # symp_prop_values = [.5, 1]
+        symp_prop_values = [.5]
+        scenario_names = ['High_prev']
+        situation_dict = {
+                          'High_prev': {'onward': onward_transmission_vector_high,
+                                       'pop': population_high,
+                                       'pre_prob': test_prob_high}
+                          }
+        swab_delay_list = [0, 1, 2]
+        priority_allocation_options = scenario.priority_order
+
+        fig, axs = plt.subplots(1, len(swab_delay_list), figsize=(8,4))
+        axs_count = itertools.count()
+        for priority_value in priority_values:
+            for priority_order in priority_allocation_options:
+                for capacity_value in capacity_values:
+                    for symp_prop_value in symp_prop_values:
+
+                        for scenario_name in scenario_names:
+                            c_dict = situation_dict[scenario_name]
+                            for swab_delay in swab_delay_list:
+                                axs_current = next(axs_count)
+
+                                test_optim = TestOptimisation(priority_queue=priority_value,
+                                                              onward_transmission=c_dict['onward'],
+                                                              population=c_dict['pop'],
+                                                              pre_test_probability=c_dict['pre_prob'],
+                                                              routine_capacity=capacity_value,
+                                                              symptomatic_testing_proportion=symp_prop_value,
+                                                              test_prioritsation_by_indication=priority_order,
+                                                              swab_delay=swab_delay)
+                                test_array, transmission_array, positive_array = \
+                                    test_optim.generate_onward_transmission_with_tests(max_tests_proportion=1000/capacity_value)
+
+
+                                axs[axs_current].plot([i/100 for i in test_array], 100*transmission_array/max(transmission_array))
+
+                                axs[axs_current].set(xlabel='Number of tests per 1000')
+                                if axs_current == 0:
+                                    axs[axs_current].set(ylabel='Percentage of onward transmission')
+                                # axs[axs_current].legend(['Outbreak response', 'Community transmission'])
+                                # axs[axs_current].set
+                                axs[axs_current].plot([capacity_value/100]*2, [70, 100],'--r')
+                                axs[axs_current].title.set_text(f'Swab delay = {swab_delay}')
+        plt.savefig(f'{base_figure_directory}/Swab_delay_vary.png')
+        plt.show()
+
+
+
     pass
