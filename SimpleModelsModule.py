@@ -81,12 +81,15 @@ class TestOptimisation:
         if self.tat_function == 'exponential':
             return self.function_turn_around_time_exp(priority_queue)(tests)
 
-    def plot_turn_around_time(self, title=None):
+    def plot_turn_around_time(self, title=None, color=None):
         tests = np.arange(self.routine_capacity * 2)
         tat = []
         for test in tests:
             tat.append(self.turn_around_time(test, False))
-        plt.plot(tests, tat)
+        if color is None:
+            plt.plot(tests, tat)
+        else:
+            plt.plot(tests, tat, color=color)
         plt.xlabel('Number of tests')
         plt.ylabel('Average turn around time')
         plt.title(title)
